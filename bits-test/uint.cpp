@@ -128,4 +128,29 @@ TEST(uint_test, multiplication)
         check(dist(rand), dist(rand));
 }
 
+TEST(uint_test, division)
+{
+    constexpr size_t bitlength = 16u;
+
+    const auto check = [](const unsigned long i0, const unsigned long i1) {
+        const auto quotientExpected = i0 / i1;
+
+        uint<bitlength> b0{i0};
+        uint<bitlength> b1{i1};
+
+        const auto quotient = (b0 / b1).bits.to_ulong();
+        EXPECT_EQ(quotient, quotientExpected);
+
+        b0 /= b1;
+        const auto quotientInPlace = b0.bits.to_ulong();
+        EXPECT_EQ(quotientInPlace, quotientExpected);
+    };
+
+    std::default_random_engine rand(1);
+    std::uniform_int_distribution<unsigned long> dist(1u, (1u << bitlength) - 1u);
+
+    for (auto i = 0; i < 100; ++i)
+        check(dist(rand), dist(rand));
+}
+
 }    // namespace sw::bits

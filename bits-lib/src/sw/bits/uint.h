@@ -1,5 +1,6 @@
 #pragma once
 #include <bitset>
+#include <stdexcept>
 
 namespace sw::bits {
 
@@ -98,6 +99,43 @@ std::bitset<bitlength> multiply(const std::bitset<bitlength> &bits0, const std::
 }
 
 template<size_t bitlength>
+size_t mostSignificantOne(const std::bitset<bitlength> &bits)
+{
+    for (auto i = bitlength - 1; i < bitlength; --i)
+    {
+        if (bits[i])
+            return i;
+    }
+    return bitlength;
+}
+
+template<size_t bitlength>
+std::bitset<bitlength> divide(const std::bitset<bitlength> &bits0, const std::bitset<bitlength> &bits1)
+{
+    std::bitset<bitlength> accumulator{0u};
+    const auto firstOne0 = mostSignificantOne(bits0);
+    const auto firstOne1 = mostSignificantOne(bits1);
+    if (firstOne1 == bitlength)
+        throw std::runtime_error("Division by zero");
+    if (firstOne0 < firstOne1)
+        return accumulator;
+
+    std::bitset<bitlength> rest = bits0;
+    const auto n = firstOne0 - firstOne1;
+    for (auto i = n; i <= n; --i)
+    {
+        const auto tmpDivisor = bits1 << i;
+        if (smaller<false>(tmpDivisor, rest))
+        {
+            accumulator[i] = true;
+            subtractInPlace(rest, tmpDivisor);
+        }
+    }
+
+    return accumulator;
+}
+
+template<size_t bitlength>
 struct uint
 {
     using bitset = std::bitset<bitlength>;
@@ -156,6 +194,12 @@ struct uint
         bits = multiply(bits, other.bits);
         return *this;
     }
+
+    uint &operator/=(const uint<bitlength> &other)
+    {
+        bits = divide(bits, other.bits);
+        return *this;
+    }
 };
 
 template<size_t bitlength>
@@ -174,6 +218,12 @@ template<size_t bitlength>
 uint<bitlength> operator*(const uint<bitlength> &a, const uint<bitlength> &b)
 {
     return uint<bitlength>{multiply(a.bits, b.bits)};
+}
+
+template<size_t bitlength>
+uint<bitlength> operator/(const uint<bitlength> &a, const uint<bitlength> &b)
+{
+    return uint<bitlength>{divide(a.bits, b.bits)};
 }
 
 }    // namespace sw::bits
