@@ -9,10 +9,10 @@ int main()
     {
         for (auto j = 0u; j <= i; ++j)
         {
-            sw::bits::uint<24> a = i;
+            sw::bits::uint<24> a{i};
             std::cout << std::format("a = {} ({})", a.bits.to_string(), a.bits.to_ulong()) << std::endl;
 
-            sw::bits::uint<24> b = j;
+            sw::bits::uint<24> b{j};
             std::cout << std::format("b = {} ({})", b.bits.to_string(), b.bits.to_ulong()) << std::endl;
 
             const auto sum = a + b;
